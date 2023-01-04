@@ -27,7 +27,7 @@ const requestUrl = (request, response, next) => {
     const method = request.method;
     const url = request.url
 
-    console.log(`This request have using the method ${method}, and have using the url ${url} `)
+    console.log(`This request I used the method ${method}, and I used the url ${url} `) 
 
     next();
 }
