@@ -1,89 +1,96 @@
-const { request, response } = require('express');
-const express = require('express');
-const uuid = require('uuid');
+const { request, response } = require("express");
+const express = require("express");
+const uuid = require("uuid");
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 const app = express();
 app.use(express.json());
 
 const orders = [];
 
 const checkOrderId = (request, response, next) => {
-    const { id } = request.params
+  const { id } = request.params;
 
-    const index = orders.findIndex(order => order.id === id);
+  const index = orders.findIndex((order) => order.id === id);
 
-    if (index < 0) {
-        return response.status(404).json({ message: "order not found" });
-    }
+  if (index < 0) {
+    return response.status(404).json({ message: "order not found" });
+  }
 
-    request.orderId = id;
-    request.orderIndex = index;
+  request.orderId = id;
+  request.orderIndex = index;
 
-    next()
-}
+  next();
+};
 
 const requestUrl = (request, response, next) => {
-    const method = request.method;
-    const url = request.url
+  const method = request.method;
+  const url = request.url;
 
-    console.log(`This request have using the method ${method}, and have using the url ${url} `)
+  console.log(
+    `This request have using the method ${method}, and have using the url ${url} `
+  );
 
-    next();
-}
+  next();
+};
 
-app.post('/order', requestUrl, (request, response) => {
-    const { order, clientName, price } = request.body
-    const clientsOrder = { id: uuid.v4(), order, clientName, price, status: "em preparação" }
+app.post("/order", requestUrl, (request, response) => {
+  const { order, clientName, price } = request.body;
+  const clientsOrder = {
+    id: uuid.v4(),
+    order,
+    clientName,
+    price,
+    status: "em preparação",
+  };
 
-    orders.push(clientsOrder);
-    console.log(request);
+  orders.push(clientsOrder);
+  console.log(request);
 
-    return response.status(201).json(orders);
-})
-
-app.get('/order', requestUrl, (request, response) => {
-    return response.json(orders);
+  return response.status(201).json(orders);
 });
 
-app.put('/order/:id', checkOrderId, requestUrl, (request, response) => {
-    const { order, clientName, price } = request.body
-    const id = request.orderId;
-    const index = request.orderIndex
+app.get("/order", requestUrl, (request, response) => {
+  return response.json(orders);
+});
 
-    const updateOrder = { id, order, clientName, price, status: "em preparação" };
+app.put("/order/:id", checkOrderId, requestUrl, (request, response) => {
+  const { order, clientName, price } = request.body;
+  const id = request.orderId;
+  const index = request.orderIndex;
 
-    orders[index] = updateOrder;
+  const updateOrder = { id, order, clientName, price, status: "em preparação" };
 
-    return response.json(updateOrder);
-})
+  orders[index] = updateOrder;
 
-app.delete('/order/:id', checkOrderId, requestUrl, (request, response) => {
-    const index = request.orderIndex;
+  return response.json(updateOrder);
+});
 
-    orders.splice(index, 1);
+app.delete("/order/:id", checkOrderId, requestUrl, (request, response) => {
+  const index = request.orderIndex;
 
-    return response.status(204).json();
-})
+  orders.splice(index, 1);
 
-app.get('/order/:id', checkOrderId, requestUrl, (request, response) => {
-    const index = request.orderIndex
+  return response.status(204).json();
+});
 
-    const findOrder = orders[index];
+app.get("/order/:id", checkOrderId, requestUrl, (request, response) => {
+  const index = request.orderIndex;
 
-    return response.json(findOrder);
-})
+  const findOrder = orders[index];
 
-app.patch('/order/:id', checkOrderId, requestUrl, (request, response) => {
-    const index = request.orderIndex
-    const order = orders[index];
+  return response.json(findOrder);
+});
 
-    order.status = " pedido pronto"
+app.patch("/order/:id", checkOrderId, requestUrl, (request, response) => {
+  const index = request.orderIndex;
+  const order = orders[index];
 
-    return response.json(order);
+  order.status = " pedido pronto";
 
-})
+  return response.json(order);
+});
 
 app.listen(port, () => {
-    console.log(`Server started on port ${port} 🚀`);
+  console.log(`Server started on port ${port} 🚀`);
 });
